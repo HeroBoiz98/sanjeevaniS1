@@ -26,12 +26,11 @@ const hitSchema = new mongoose.Schema({
 
 const Hit = mongoose.model('Hit', hitSchema);
 
-// Review Schema
+// Review Schema (removed screenshot field)
 const reviewSchema = new mongoose.Schema({
     fullName: { type: String, required: true },
     contact: { type: String, required: true },
     review: { type: String, required: true },
-    screenshot: { type: Buffer, required: true }, // Store as binary data
     createdAt: { type: Date, default: Date.now }
 });
 
@@ -95,29 +94,37 @@ app.post('/api/hit', async (req, res) => {
     res.json({ count: hit.count });
 });
 
-// Endpoint to handle review submission
+// Endpoint to handle review submission (removed screenshot handling)
 app.post('/api/review', async (req, res) => {
-    const { fullName, contact, review, screenshot } = req.body;
+    const { fullName, contact, review } = req.body;
 
     // Log the received data for debugging
-    console.log('Received review data:', { fullName, contact, review, screenshot });
+    console.log('Received review data:', { fullName, contact, review });
 
     // Check if all required fields are present
-    if (!fullName || !contact || !review || !screenshot) {
+    if (!fullName || !contact || !review) {
         return res.status(400).json({ error: 'All fields are required.' });
     }
 
     try {
-        // Convert Base64 string to Buffer
-        const screenshotBuffer = Buffer.from(screenshot.split(',')[1], 'base64');
-
-        const newReview = new Review({ fullName, contact, review, screenshot: screenshotBuffer });
+        const newReview = new Review({ fullName, contact, review });
         await newReview.save();
 
         res.json({ message: 'Review submitted successfully!' });
     } catch (error) {
         console.error('Error saving review:', error);
         res.status(500).json({ error: 'An error occurred while saving your review.' });
+    }
+});
+
+// Endpoint to get all reviews
+app.get('/api/review', async (req, res) => {
+    try {
+        const reviews = await Review.find({});
+        res.json(reviews); // Return reviews without screenshot data
+    } catch (error) {
+        console.error('Error fetching reviews:', error);
+        res.status(500).json({ error: 'An error occurred while fetching reviews.' });
     }
 });
 
