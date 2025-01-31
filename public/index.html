@@ -263,7 +263,7 @@
 
             // Capture screenshot
             html2canvas(document.body).then(canvas => {
-                const screenshot = canvas.toDataURL('image/png'); // Get the screenshot as a Base64 string
+             // Get the screenshot as a Base64 string
 
                 // Send review data to the server
                 axios.post('/api/review', { fullName, contact, review, screenshot })
